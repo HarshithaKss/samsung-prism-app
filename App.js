@@ -124,6 +124,8 @@ const fetchWithTimeout = async (url, options, timeout = API_TIMEOUT_MS) => {
   ]);
 };
 
+
+
 export default function App() {
   // Lifted session scan log history state
   const [historyItems, setHistoryItems] = useState(MOCK_HISTORY);
@@ -215,6 +217,7 @@ export default function App() {
     inputRange: [0, 1],
     outputRange: [12, VIEWFINDER_SIZE * 1.33 - 12],
   });
+
 
   // =============================================================
   // MODEL INFERENCE ROUTINE (Server call with Mock Fallback)
@@ -335,6 +338,12 @@ export default function App() {
 
       const finalWinnerName = matchIdx !== -1 ? scoresList[matchIdx].name : rawLabel;
 
+      // Read sub_class directly from server response (server calls HuggingFace)
+      const subClassValue = apiResponse.sub_class || null;
+      if (subClassValue) {
+        Alert.alert('Direction Sign Detected: ' + subClassValue);
+      }
+
       const outputResult = {
         id: `scan-${Date.now()}`,
         className: finalWinnerName,
@@ -346,6 +355,7 @@ export default function App() {
         predictions: sortedProbs.slice(0, 3),
         allScores: sortedProbs,
         isRealAPI: true,
+        subClass: subClassValue,
       };
 
       setHistoryItems((prev) => [outputResult, ...prev]);
@@ -409,6 +419,7 @@ export default function App() {
         'newspaper': 'newspaper-sharp'
       };
 
+      // In mock/fallback mode there is no real image → sub_class not available
       const fallbackResult = {
         id: `scan-${Date.now()}`,
         className: selectedClass.name,
@@ -420,6 +431,7 @@ export default function App() {
         predictions: sortedPredictions.slice(0, 3),
         allScores: sortedPredictions,
         isRealAPI: false,
+        subClass: null,
       };
 
       setHistoryItems((prev) => [fallbackResult, ...prev]);
@@ -700,6 +712,11 @@ export default function App() {
           <View style={styles.primaryClassCard}>
             <Text style={styles.classifiedSubtitle}>CLASSIFIED AS</Text>
             <Text style={styles.classNameHeader}>{selectedResult.className}</Text>
+            {selectedResult.subClass && (
+              <Text style={{ fontSize: 15, color: COLORS.cyanAccent, marginTop: -2, marginBottom: 8, fontWeight: '600' }}>
+                Direction Sign: {selectedResult.subClass}
+              </Text>
+            )}
 
             <View style={styles.confidenceRow}>
               <Text style={styles.confidenceLabel}>Confidence</Text>

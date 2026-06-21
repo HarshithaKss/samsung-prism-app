@@ -10,6 +10,85 @@ from PIL import Image
 
 import tensorflow as tf
 
+# -------------------------------------------------------------
+# GTSRB DIRECTION SIGN SUB-CLASSIFIER (local timm model)
+# -------------------------------------------------------------
+# GTSRB class IDs 33-40 are direction signs
+GTSRB_DIRECTION_LABELS = {
+    33: 'Turn right ahead',
+    34: 'Turn left ahead',
+    35: 'Ahead only',
+    36: 'Go straight or right',
+    37: 'Go straight or left',
+    38: 'Keep right',
+    39: 'Keep left',
+    40: 'Roundabout mandatory',
+}
+
+# Module-level model cache — loaded once at startup
+_gtsrb_model = None
+_gtsrb_processor = None
+
+def _load_gtsrb_model():
+    global _gtsrb_model, _gtsrb_processor
+    try:
+        import torch
+        import timm
+        from huggingface_hub import hf_hub_download
+        from torchvision import transforms
+
+        weights_path = hf_hub_download(repo_id='bazyl/gtsrb-model', filename='pytorch_model.bin')
+        model = timm.create_model('vit_base_patch16_224', pretrained=False, num_classes=43)
+        state_dict = torch.load(weights_path, map_location='cpu')
+        if 'model_state_dict' in state_dict:
+            state_dict = state_dict['model_state_dict']
+        model.load_state_dict(state_dict, strict=False)
+        model.eval()
+        _gtsrb_model = model
+        _gtsrb_processor = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+        print('[+] GTSRB sub-classifier loaded successfully.')
+    except Exception as e:
+        print(f'[-] GTSRB failed: {e}')
+        _gtsrb_model = None
+        _gtsrb_processor = None
+
+
+# Load at startup (non-fatal if it fails)
+_load_gtsrb_model()
+
+
+def get_direction_subclass(pil_image):
+    """Run local GTSRB inference and return the best direction sign label (IDs 33-40)."""
+    if _gtsrb_model is None or _gtsrb_processor is None:
+        return None
+    try:
+        import torch
+
+        input_tensor = _gtsrb_processor(pil_image).unsqueeze(0)  # [1, C, H, W]
+
+        with torch.no_grad():
+            logits = _gtsrb_model(input_tensor)           # [1, 43] raw logits
+            probs = torch.softmax(logits, dim=1)[0]       # [43]
+
+        # Filter only direction sign class IDs 33-40
+        best_label = None
+        best_score = -1.0
+        for class_id, label_name in GTSRB_DIRECTION_LABELS.items():
+            score = float(probs[class_id])
+            if score > best_score:
+                best_score = score
+                best_label = label_name
+
+        print(f'[+] GTSRB direction sub-class: {best_label} (score={best_score:.4f})')
+        return best_label
+    except Exception as e:
+        print(f'[-] GTSRB direction sub-classification inference failed: {e}')
+        return None
+
 app = Flask(__name__)
 CORS(app) # Enable CORS for cross-origin local fetch requests
 
@@ -121,11 +200,18 @@ def classify():
             # Slice to 9 if model has extra output indexes
             all_scores_list = all_scores_list[:len(CLASSES)]
 
+        # 9. If prediction is direction_traffic_signs, run local GTSRB sub-classifier
+        sub_class = None
+        if label == 'direction_traffic_signs':
+            print('[*] direction_traffic_signs predicted - running GTSRB sub-classifier...')
+            sub_class = get_direction_subclass(image)
+
         return jsonify({
             'label': label,
             'confidence': confidence,
             'all_scores': all_scores_list,
-            'inference_time_ms': max(1, inference_time_ms)
+            'inference_time_ms': max(1, inference_time_ms),
+            'sub_class': sub_class,
         })
 
     except Exception as e:
