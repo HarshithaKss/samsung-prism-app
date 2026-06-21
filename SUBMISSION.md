@@ -26,7 +26,7 @@ This document serves as the central hub for the **Document Classifier** project.
 * **HuggingFace & GitHub References:** [docs/REFERENCES.md](https://github.com/HarshithaKss/samsung-prism-app/blob/main/docs/REFERENCES.md)
 
 ## 5. 🎥 Demo Video
-* [ ] **Video Link:** *(Upload your MP4 video demonstrating the working app and paste the link here)*
+* [ ] **Video Link:** *(https://drive.google.com/file/d/1ekjGsmRrsZGvN_NzPBwtZxgha5KlkhfC/view?usp=sharing)*
 
 
 > **Note to Mentors/Reviewers:** The following items will be linked here once finalized.
