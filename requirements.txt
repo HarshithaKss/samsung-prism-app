@@ -3,3 +3,8 @@ flask-cors
 pillow
 numpy
 tensorflow
+timm
+huggingface_hub
+torch
+torchvision
+transformers
