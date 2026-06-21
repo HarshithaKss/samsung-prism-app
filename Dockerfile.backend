@@ -1,0 +1,66 @@
+# =============================================================
+# Dockerfile.backend — Samsung PRISM ML Inference Server
+# Python Flask + TensorFlow Lite + PyTorch/timm (CPU-only)
+# =============================================================
+# Image classification backend serving 9 document categories
+# with GTSRB traffic sign sub-classification via Vision Transformer.
+#
+# Build:  docker build -f Dockerfile.backend -t prism-backend .
+# Run:    docker run -p 5000:5000 prism-backend
+# =============================================================
+
+FROM python:3.11-slim
+
+LABEL maintainer="Samsung PRISM Team"
+LABEL description="Document Classifier ML Inference Server (TFLite + PyTorch ViT)"
+
+# ── Environment Configuration ────────────────────────────────
+# Prevent Python from writing .pyc files and enable unbuffered stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    # Suppress TensorFlow verbose logs (only show errors)
+    TF_CPP_MIN_LOG_LEVEL=2 \
+    # HuggingFace cache inside the container
+    HF_HOME=/app/.cache/huggingface
+
+# ── System Dependencies ──────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# ── Python Dependencies (layered for cache efficiency) ───────
+# 1. Install CPU-only PyTorch FIRST (avoids ~2GB CUDA download)
+RUN pip install --no-cache-dir \
+    torch torchvision \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# 2. Install remaining ML & web framework dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ── Pre-download HuggingFace GTSRB model during build ───────
+# This avoids needing internet access at container startup.
+# Model: bazyl/gtsrb-model — ViT-Base for traffic sign classification
+RUN python -c "\
+from huggingface_hub import hf_hub_download; \
+print('[*] Pre-downloading GTSRB ViT model from HuggingFace...'); \
+hf_hub_download(repo_id='bazyl/gtsrb-model', filename='pytorch_model.bin'); \
+print('[+] GTSRB model cached successfully.')"
+
+# ── Application Code & Model Files ──────────────────────────
+COPY server.py .
+COPY model/ model/
+
+# ── Container Configuration ─────────────────────────────────
+EXPOSE 5000
+
+# Health check — verifies Flask is responding on /health
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# ── Entrypoint ──────────────────────────────────────────────
+CMD ["python", "server.py"]

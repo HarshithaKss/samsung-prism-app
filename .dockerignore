@@ -1,0 +1,79 @@
+# =============================================================
+# .dockerignore — Samsung PRISM Document Classifier
+# Excludes unnecessary files from the Docker build context
+# =============================================================
+
+# Version control
+.git/
+.gitignore
+
+# Node.js dependencies (rebuilt inside container)
+node_modules/
+
+# Expo generated directories
+.expo/
+dist/
+web-build/
+
+# Native platform builds (not needed in Docker)
+android/
+ios/
+.kotlin/
+
+# IDE and editor files
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Signing keys and certificates
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Debug logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env*.local
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Metro bundler
+.metro-health-check*
+
+# Expo environment types
+expo-env.d.ts
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Utility scripts not needed at runtime
+repack.py
+
+# Documentation (not needed in container)
+LICENSE
+CLAUDE.md
+AGENTS.md
+.agents/
+
+# Docker files themselves
+Dockerfile.*
+docker-compose.yml
+.dockerignore
+
+# README
+README.md
