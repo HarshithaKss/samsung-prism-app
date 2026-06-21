@@ -7,6 +7,7 @@ import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image
+import threading
 
 import tensorflow as tf
 
@@ -28,6 +29,7 @@ GTSRB_DIRECTION_LABELS = {
 # Module-level model cache — loaded once at startup
 _gtsrb_model = None
 _gtsrb_processor = None
+_models_loaded = False
 
 def _load_gtsrb_model():
     global _gtsrb_model, _gtsrb_processor
@@ -55,10 +57,6 @@ def _load_gtsrb_model():
         print(f'[-] GTSRB failed: {e}')
         _gtsrb_model = None
         _gtsrb_processor = None
-
-
-# Load at startup (non-fatal if it fails)
-_load_gtsrb_model()
 
 
 def get_direction_subclass(pil_image):
@@ -113,21 +111,26 @@ interpreter = None
 input_details = None
 output_details = None
 
-print(f"[*] Loading TFLite model from: {MODEL_PATH}...")
-try:
-    interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
-    interpreter.allocate_tensors()
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    print("[+] TFLite Model loaded successfully!")
-    print(f"  Input Details: {input_details}")
-    print(f"  Output Details: {output_details}")
-except Exception as e:
-    print(f"[-] Error loading TFLite model: {e}")
+def _load_tflite_model():
+    global interpreter, input_details, output_details
+    print(f"[*] Loading TFLite model from: {MODEL_PATH}...")
+    try:
+        interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
+        interpreter.allocate_tensors()
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+        print("[+] TFLite Model loaded successfully!")
+        print(f"  Input Details: {input_details}")
+        print(f"  Output Details: {output_details}")
+    except Exception as e:
+        print(f"[-] Error loading TFLite model: {e}")
 
 
 @app.route('/classify', methods=['POST'])
 def classify():
+    if not _models_loaded:
+        return jsonify({'error': 'Model loading, please wait'}), 503
+
     if interpreter is None:
         return jsonify({'error': 'TFLite Model is not loaded on server.'}), 500
 
@@ -220,6 +223,16 @@ def classify():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    def load_models():
+        global _models_loaded
+        try:
+            _load_gtsrb_model()
+            _load_tflite_model()
+        finally:
+            _models_loaded = True
+
+    threading.Thread(target=load_models).start()
+
     port = int(os.environ.get('PORT', 5000))
     print(f"[*] Starting TFLite Flask Inference Server on port {port}...")
     app.run(host='0.0.0.0', port=port, debug=False)
