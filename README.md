@@ -42,6 +42,30 @@ When a document is identified as a **direction traffic sign**, a secondary Visio
 
 ---
 
+## 🚀 Live Demo (Kaggle — no setup)
+
+Try the model in your browser:
+**https://www.kaggle.com/code/siddhm11/samsung-prism-document-classifier-demo**
+
+- **Just look:** open the link — it already shows finished outputs (real-world photos
+  classified with confidence; green = correct).
+- **Run it:** click **Copy & Edit → Run → Run All**. The model and sample images are
+  pre-attached as public data — no installs, no internet needed.
+- **Try your own image:** right panel → **Add Data → Upload**, set
+  `TEST_IMAGE = '/kaggle/input/<your-file>'` in the last cell, and re-run it.
+
+### Run locally
+```bash
+pip install pillow numpy ai-edge-litert
+python inference.py path/to/image.jpg      # or: python inference.py samples/
+```
+The model takes raw 224×224 uint8 pixels (normalization is baked into the int8
+quantization) and returns a 9-class label + confidence.
+
+See **[docs/DEMO.md](docs/DEMO.md)** for how to run the live demo.
+
+---
+
 ## 🏗️ Architecture
 
 See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the system architecture diagram,
