@@ -107,10 +107,10 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant User
-    participant Frontend as Frontend (nginx)
-    participant Backend as Backend (Flask)
-    participant TFLite as TFLite Model
-    participant ViT as GTSRB ViT Model
+    participant Frontend as "Frontend (nginx)"
+    participant Backend as "Backend (Flask)"
+    participant TFLite as "TFLite Model"
+    participant ViT as "GTSRB ViT Model"
 
     User->>Frontend: Upload/Capture Image
     Frontend->>Backend: POST /classify {image: base64}
