@@ -28,7 +28,7 @@ import { CameraView, useCameraPermissions, Camera } from 'expo-camera';
 // Docker/Web: uses relative URL '' so requests go through nginx reverse proxy
 // Mobile:     uses the local network IP of the machine running the Flask server
 const MOBILE_API_URL = 'http://192.168.1.6:5000';  // ← Change this to your machine's local IP for mobile use
-const API_BASE_URL = Platform.OS === 'web' ? '' : MOBILE_API_URL;
+const API_BASE_URL = 'https://samsung-prism-app.onrender.com';
 const USE_API = true;                            // Set to false to bypass the API and run offline mock mode
 const API_TIMEOUT_MS = 10000;                    // Connection timeout boundary before falling back
 
