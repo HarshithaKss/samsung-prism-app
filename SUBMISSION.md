@@ -25,17 +25,14 @@ This document serves as the central hub for the **Document Classifier** project.
 * **Models Used & Fine-Tuning Details:** [docs/MODELS.md](https://github.com/HarshithaKss/samsung-prism-app/blob/main/docs/MODELS.md)
 * **HuggingFace & GitHub References:** [docs/REFERENCES.md](https://github.com/HarshithaKss/samsung-prism-app/blob/main/docs/REFERENCES.md)
 
----
+## 5. 🎥 Demo Video
+* [ ] **Video Link:** *(Upload your MP4 video demonstrating the working app and paste the link here)*
 
-## ⚠️ Pending Uploads (To Be Added)
 
 > **Note to Mentors/Reviewers:** The following items will be linked here once finalized.
 
 ### 📱 Android APK
 * [ ] **APK Download Link:** *(Upload your generated .apk file to GitHub or a cloud drive and paste the link here)*
-
-### 🎥 Demo Video
-* [ ] **Video Link:** *(Upload your MP4 video demonstrating the working app and paste the link here)*
 
 ### 📁 Document Folder (Reports & Presentations)
 * [ ] **Monthly Connect Reports:** *(Link to folder)*
