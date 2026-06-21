@@ -31,8 +31,15 @@ _gtsrb_model = None
 _gtsrb_processor = None
 _models_loaded = False
 
+import os
+IS_PRODUCTION = os.environ.get('RENDER', False)
+
 def _load_gtsrb_model():
     global _gtsrb_model, _gtsrb_processor
+    if IS_PRODUCTION:
+        _gtsrb_model = None
+        _gtsrb_processor = None
+        return
     try:
         import torch
         import timm
@@ -61,7 +68,7 @@ def _load_gtsrb_model():
 
 def get_direction_subclass(pil_image):
     """Run local GTSRB inference and return the best direction sign label (IDs 33-40)."""
-    if _gtsrb_model is None or _gtsrb_processor is None:
+    if IS_PRODUCTION or _gtsrb_model is None or _gtsrb_processor is None:
         return None
     try:
         import torch
