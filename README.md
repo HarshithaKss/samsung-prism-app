@@ -44,6 +44,12 @@ When a document is identified as a **direction traffic sign**, a secondary Visio
 
 ## 🏗️ Architecture
 
+See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the system architecture diagram,
+**[docs/MODELS.md](docs/MODELS.md)** for the models used and fine-tuning details, and
+**[docs/REFERENCES.md](docs/REFERENCES.md)** for the GitHub/HuggingFace sources.
+
+![System architecture](docs/system_architecture.png)
+
 ```mermaid
 graph TB
     subgraph "Docker Compose Stack"
