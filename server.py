@@ -219,6 +219,17 @@ def classify():
         print(f"[-] Error during classification: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint for Docker and monitoring tools."""
+    return jsonify({
+        'status': 'ok',
+        'model_loaded': interpreter is not None,
+        'gtsrb_loaded': _gtsrb_model is not None,
+        'classes': len(CLASSES),
+    })
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"[*] Starting TFLite Flask Inference Server on port {port}...")
