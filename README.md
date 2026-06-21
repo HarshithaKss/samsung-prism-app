@@ -73,6 +73,7 @@ See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the system architecture
 **[docs/REFERENCES.md](docs/REFERENCES.md)** for the GitHub/HuggingFace sources.
 
 ![System architecture](docs/system_architecture.png)
+*ML training & inference pipeline*
 
 ```mermaid
 graph TB
@@ -99,6 +100,7 @@ graph TB
     C --> D
     D -->|"direction_traffic_signs"| E
 ```
+*Docker deployment stack*
 
 ### Request Flow
 
@@ -356,11 +358,14 @@ Scan the QR code with Expo Go on your device.
 | Property | Value |
 |---|---|
 | **File** | `model/model_qad_int8.tflite` |
-| **Size** | 2.6 MB |
-| **Quantization** | INT8 (post-training quantized) |
-| **Input** | `[1, 224, 224, 3]` uint8 |
-| **Output** | `[1, 9]` quantized scores |
-| **Classes** | 9 document categories |
+| **Architecture** | MobileNetV2 (α=1.0), ImageNet → fine-tuned on the 9 classes |
+| **Training** | Quantization-Aware **Distillation** (QAD): student distilled from an EfficientNetB0 teacher (T=4, α=0.5), trained quantization-aware, exported to INT8 |
+| **Quantization** | Full INT8 (uint8 in/out — normalization baked into the input quantization) |
+| **Size** | 2.7 MB |
+| **Input / Output** | `[1,224,224,3]` uint8 (raw pixels) → `[1,9]` scores → softmax |
+| **Accuracy** | 96.9% on held-out test |
+
+> Full model & fine-tuning details: [docs/MODELS.md](docs/MODELS.md).
 
 ### Sub-Classifier — GTSRB ViT (PyTorch)
 
