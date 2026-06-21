@@ -29,7 +29,7 @@ GTSRB_DIRECTION_LABELS = {
 # Module-level model cache — loaded once at startup
 _gtsrb_model = None
 _gtsrb_processor = None
-_models_loaded = False
+models_ready = False
 
 import os
 IS_PRODUCTION = os.environ.get('RENDER', False)
@@ -135,8 +135,11 @@ def _load_tflite_model():
 
 @app.route('/classify', methods=['POST'])
 def classify():
-    if not _models_loaded:
-        return jsonify({'error': 'Model loading, please wait'}), 503
+    global models_ready
+    if not models_ready:
+        _load_gtsrb_model()
+        _load_tflite_model()
+        models_ready = True
 
     if interpreter is None:
         return jsonify({'error': 'TFLite Model is not loaded on server.'}), 500
@@ -230,16 +233,6 @@ def classify():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    def load_models():
-        global _models_loaded
-        try:
-            _load_gtsrb_model()
-            _load_tflite_model()
-        finally:
-            _models_loaded = True
-
-    threading.Thread(target=load_models).start()
-
     port = int(os.environ.get('PORT', 5000))
     print(f"[*] Starting TFLite Flask Inference Server on port {port}...")
     app.run(host='0.0.0.0', port=port, debug=False)
