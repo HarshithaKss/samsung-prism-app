@@ -32,7 +32,7 @@ This document serves as the central hub for the **Document Classifier** project.
 > **Note to Mentors/Reviewers:** The following items will be linked here once finalized.
 
 ### 📱 Android APK
-* [ ] **APK Download Link:** *(Upload your generated .apk file to GitHub or a cloud drive and paste the link here)*
+* [ ] **APK Download Link:** *(will be updated)*
 
 ### 📁 Document Folder (Reports & Presentations)
 * [ ] **Monthly Connect Reports:** *(Link to folder)*
