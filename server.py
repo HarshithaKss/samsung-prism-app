@@ -219,7 +219,7 @@ def classify():
         print(f"[-] Error during classification: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    print(f"[*] Starting TFLite Flask Inference Server on port {port}...")
-    app.run(host='0.0.0.0', port=port, debug=False)
+port = int(os.environ.get('PORT', 5000))
+print(f"[*] Starting TFLite Flask Inference Server on port {port}...")
+app.run(host='0.0.0.0', port=port, debug=False)
+
