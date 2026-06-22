@@ -261,7 +261,7 @@ Classify a document image into one of 9 categories.
   "label": "business_cards",
   "confidence": 0.9847,
   "all_scores": [0.001, 0.002, 0.003, 0.985, 0.001, 0.002, 0.003, 0.002, 0.001],
-  "inference_time_ms": 12,
+  "inference_time_ms": 7,
   "sub_class": null
 }
 ```
